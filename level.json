@@ -1,5 +1,6 @@
-{
-    "1": {
+[ {
+        "niveau": "Débutant",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         "dimensions": [80, 40],
         "delay": 200,
         "walls": [
@@ -9,12 +10,12 @@
             [10,10]
         ],
         "snake": [
-          [60,60],
-          [60,59],
-          [60,58]
+          [18,18], [18, 19], [18,20]
         ]    
     },
-    "2": {
+    {
+        "niveau": "Intermédiaire",
+        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
         "dimensions": [80, 40],
         "delay": 200,
         "walls": [
@@ -24,12 +25,10 @@
             [10,10]
         ],
         "snake": [
-          [60,60],
-          [60,59],
-          [60,58]
+            [18,18], [18, 19], [18,20]
         ]    
     }
-}
+]
 
 
 

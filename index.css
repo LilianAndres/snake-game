@@ -1,0 +1,35 @@
+body * {
+    border: 1px solid red;
+}
+
+.header h1 {
+    text-align: center;
+    color: green;
+}
+
+.cards {
+    display: flex;
+    flex-direction: column;
+    margin: 10vh 12vw 0 12vw;
+}
+
+.cards .card {
+    margin-bottom: 1vh;
+    padding: 10px;
+}
+
+.card a.fill-div {
+    display: block;
+    height: 100%;
+    width: 100%;
+    text-decoration: none;
+}
+
+.card a {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+canvas {
+    margin: 5vh 0 0 15vw;
+}
