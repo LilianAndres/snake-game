@@ -31,5 +31,7 @@ body * {
 }
 
 canvas {
-    margin: 5vh 0 0 15vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
 }

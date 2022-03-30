@@ -3,13 +3,17 @@ const EMPTY = "EMPTY";
 const WALL = "WALL";
 const FOOD = "FOOD";
 const SNAKE = "SNAKE";
+const CELLSIZE = 15;
+
 let levels;
 let world = [];
-let snake;
+let snake = [];
 
 // listeners
 window.addEventListener('load', load);
-window.addEventListener('hashchange', drawWorld);
+window.addEventListener('hashchange', generateWorld);
+document.addEventListener('keydown', step, false);
+
 
 async function load() {
     const response = await fetch("level.json");
@@ -21,6 +25,7 @@ async function load() {
     
     displayLevels();
 }
+
 
 function displayLevels() 
 {
@@ -56,10 +61,12 @@ function displayLevels()
 }
 
 
-function drawWorld()
+function generateWorld()
 {
-    var cards = document.getElementById('cards');
-    cards.parentNode.removeChild(cards);
+    if (document.getElementById('cards') != null) {
+        var cards = document.getElementById('cards');
+        cards.parentNode.removeChild(cards);
+    }    
 
     var iLevel = window.location.hash[1];
     var walls = levels[iLevel].walls;
@@ -83,24 +90,45 @@ function drawWorld()
         }
     }
 
-    var canvas = document.createElement("canvas");
-    canvas.width = window.innerWidth * 0.7;
-    canvas.height = window.innerHeight * 0.7;
-    document.body.appendChild(canvas);
+    drawMap();
+}
 
+function drawMap()
+{
+    if (document.getElementById('canvas') === null) {
+        var canvas = document.createElement("canvas");
+        canvas.width = CELLSIZE * world[0].length;
+        canvas.height = CELLSIZE * world.length;
+        canvas.id = 'canvas';
+        document.body.appendChild(canvas);
+    }    
+
+    var canvas = document.getElementById('canvas');
     var ctx = canvas.getContext('2d');
-    var cellWidth = canvas.width / size[0];
-    var cellHeight = canvas.height / size[1];
 
     var y = 0;
-    for (var i = 0; i < size[0]; i++) {
+    for (var i = 0; i < world.length; i++) {
         var x = 0;
-        for (var j = 0; j < size[1]; j++) {
-            ctx.fillStyle = cellTexture(world[i][j]);
-            ctx.fillRect(x, y, cellWidth, cellHeight);
-            x += cellWidth;
+        for (var j = 0; j < world[0].length; j++) {
+            
+            // select a style 
+            if (world[i][j] === FOOD) {
+                ctx.fillStyle = 'red';
+            } else if (world[i][j] === SNAKE) {
+                ctx.fillStyle = 'green';
+            } else if (world[i][j] === WALL) {
+                ctx.fillStyle = 'brown';
+            } else {
+                if (i % 2 == 0) ctx.fillStyle = (j % 2 == 0) ? '#0454b0' : '#4692ea';
+                else ctx.fillStyle = (j % 2 == 0) ? '#4692ea' : '#0454b0';
+            }
+
+            // then apply to the cell
+            ctx.fillRect(x, y, CELLSIZE, CELLSIZE); 
+
+            x += CELLSIZE;
         }
-        y += cellHeight;
+        y += CELLSIZE;
     }
 }
 
@@ -124,11 +152,8 @@ function isArrayInArray(array, item)
     return false
 }
 
-function cellTexture(cell) 
-{
-    if (cell === WALL) return 'black';
-    else if (cell === FOOD) return 'red';
-    else if (cell === SNAKE) return 'green';
-    else return 'blue'
-}
 
+function step(e)
+{
+    console.log(e.keyCode);
+}
