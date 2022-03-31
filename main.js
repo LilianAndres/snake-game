@@ -13,9 +13,20 @@ let walls = null;
 let snakeBody = [];
 let world = [];
 
+let run = false;
+
+let direction = {
+    nom : "droite",
+    y : 1 ,
+    x : 0 ,
+};
+
+
 // listeners
 window.addEventListener('load', load);
 window.addEventListener('hashchange', generateWorld);
+document.addEventListener('keydown', setDirection, false);
+
 
 // chargement initial de la page
 async function load() {
@@ -201,3 +212,98 @@ function isArrayInArray(array, item)
     return false
 }
 
+
+function step()
+{
+    if(run){
+        var canvas = document.getElementById('canvas');
+        var ctx = canvas.getContext('2d');
+
+        var newx = snake[snake.length-1][0] +direction.x ;
+        var newy = snake[snake.length-1][1] + direction.y;
+
+        if (!checkColision(newx,newy) ){
+
+            snake.push([newx,newy]);
+
+            world[newx][newy] = SNAKE ;
+
+            pFinX = snake[0][0];
+            pFinY = snake[0][1] ;
+
+            world[pFinX][pFinY] = EMPTY ;
+            snake.shift();
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawMap();
+
+            if (world[snake[snake.length-1][0]] [snake[snake.length-1][1]] ==FOOD){
+                SetRandomFood();
+            }
+
+        }
+
+    }
+
+}
+
+function running(){
+    setInterval(step,800);
+}
+
+
+
+function setDirection(e){
+    
+    if(run == false){
+        running();
+        run = true;
+    }
+
+    if (e.keyCode== 37 && direction.nom !="droite"){
+        console.log("gauche");
+        direction.nom = "gauche";
+        direction.x = 0;
+        direction.y = -1;
+
+    }
+    else if(e.keyCode == 38 && direction.nom !="bas"){
+        console.log("haut");
+        direction.nom ="haut";
+        direction.x = -1;
+        direction.y = 0 ;   
+    }
+    else if(e.keyCode == 39 && direction.nom !="gauche" ){
+        console.log("droite");
+        direction.nom = "droite";
+        direction.x =  0;
+        direction.y = 1 ;   
+    }
+    else if(e.keyCode == 40 && direction.nom !="haut" ){
+        console.log("bas");
+        direction.nom = "bas";
+        direction.x =  1;
+        direction.y = 0 ;   
+    }
+
+}
+
+function SetRandomFood(){
+    Math.floor(Math.random() * (max - min)) + min;
+}
+
+function checkColision(newx,newy){
+    if(newx<0 || newx>world.length-1 || newy<0 || newy>world.length-1 ){
+        console.log("game over");
+        run = false;
+        return true ;
+    }
+
+    if(world[newx][newy]==WALL ){
+        console.log("game over");
+        run=false ;
+        return true ;
+    }
+
+    return false ;
+}
