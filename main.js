@@ -109,9 +109,9 @@ function generateWorld()
     food = level.food;
     snakeBody = level.snake;
 
-    for (var i = 0; i < level.dimensions[0]; i++) {
+    for (var i = 0; i < level.dimensions[1]; i++) {
         world[i] = [];
-        for (var j = 0; j < level.dimensions[1]; j++) {
+        for (var j = 0; j < level.dimensions[0]; j++) {
             if (isArrayInArray(walls, [i, j])) {
                 world[i][j] = WALL;
             } else if (isArrayInArray(food, [i, j])) {
@@ -130,17 +130,23 @@ function generateWorld()
 // dessine la matrice dans le canvas HTML
 function drawMap()
 {
+
     // si c'est le premier appel à la méthode, le canvas n'existe pas
     if (document.getElementById('canvas') === null) {
+        // var title = document.getElementById('header');
+        // title.parentNode.removeChild(title);
         var canvas = document.createElement("canvas");
-        canvas.width = level.cellSize * world[0].length;
-        canvas.height = level.cellSize * world.length;
         canvas.id = 'canvas';
         document.body.appendChild(canvas);
     }    
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
+
+    var scale = (window.innerHeight - canvas.offsetTop) / level.dimensions[0];
+
+    canvas.width = scale * level.dimensions[1];
+    canvas.height = scale * level.dimensions[0];
 
     // on récupère la tête et la queue pour les dessiner spécifiquement
     if (snakeBody.length > 1) {
@@ -152,46 +158,41 @@ function drawMap()
     }
     
     // effectue le dessin
-    var y = 0;
-    for (var i = 0; i < world.length; i++) {
-        var x = 0;
-        for (var j = 0; j < world[i].length; j++) {
+    for (var i = 0; i < level.dimensions[1]; i++) {
+        for (var j = 0; j < level.dimensions[0]; j++) {
 
             // les cases sont remplies avec des couleurs alternées pour les differencier
             if (i % 2 == 0) ctx.fillStyle = (j % 2 == 0) ? '#0454b0' : '#4692ea';
             else ctx.fillStyle = (j % 2 == 0) ? '#4692ea' : '#0454b0';
-            ctx.fillRect(x, y, level.cellSize, level.cellSize); 
+            ctx.fillRect(i * scale, j * scale, scale, scale); 
             
             // applique les styles propres à chaque état du monde
             if (world[i][j] === FOOD) {                
-                ctx.drawImage(document.getElementById('apple'), x, y, level.cellSize, level.cellSize);
+                ctx.drawImage(document.getElementById('apple'), i * scale, j * scale, scale, scale);
             } else if (world[i][j] === SNAKE) {
                 if (i == head[0] && j == head[1]) {
                     // dessine sa tête
                     ctx.beginPath();
-                    ctx.arc(x + level.cellSize/2, y + level.cellSize/2, level.cellSize/2, 0, 2 * Math.PI);
+                    ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/2, 0, 2 * Math.PI);
                     ctx.fillStyle = 'green';
                     ctx.fill();
                 } else if (tail != null && i == tail[0] && j == tail[1]) {
                     // dessine sa queue, si elle existe (si le corps du serpent fait au moins 2 cases)
                     ctx.beginPath();
-                    ctx.arc(x + level.cellSize/2, y + level.cellSize/2, level.cellSize/4, 0, 2 * Math.PI);
+                    ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/4, 0, 2 * Math.PI);
                     ctx.fillStyle = 'green';
                     ctx.fill();
                 } else {
                     // dessine les morceaux du corps
                     ctx.beginPath();
-                    ctx.arc(x + level.cellSize/2, y + level.cellSize/2, level.cellSize/3, 0, 2 * Math.PI);
+                    ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/3, 0, 2 * Math.PI);
                     ctx.fillStyle = 'green';
                     ctx.fill();
                 }
             } else if (world[i][j] === WALL) {
-                ctx.drawImage(document.getElementById('wall'), x, y, level.cellSize, level.cellSize);
+                ctx.drawImage(document.getElementById('wall'), i * scale, j * scale, scale, scale);
             }
-
-            x += level.cellSize;
         }
-        y += level.cellSize;
     }
 }
 
@@ -281,27 +282,26 @@ function setDirection(e){
     if (e.keyCode== 37 && direction.nom !="droite"){
         //console.log("gauche");
         direction.nom = "gauche";
-        direction.x = 0;
-        direction.y = -1;
-
+        direction.x = -1;
+        direction.y = 0;
     }
     else if(e.keyCode == 38 && direction.nom !="bas"){
         //console.log("haut");
         direction.nom ="haut";
-        direction.x = -1;
-        direction.y = 0 ;   
+        direction.x = 0;
+        direction.y = -1;   
     }
     else if(e.keyCode == 39 && direction.nom !="gauche" ){
         //console.log("droite");
         direction.nom = "droite";
-        direction.x =  0;
-        direction.y = 1 ;   
+        direction.x = 1;
+        direction.y = 0;   
     }
     else if(e.keyCode == 40 && direction.nom !="haut" ){
         //console.log("bas");
         direction.nom = "bas";
-        direction.x =  1;
-        direction.y = 0 ;   
+        direction.x =  0;
+        direction.y = 1;   
     }
 
 }
@@ -321,7 +321,7 @@ function SetRandomFood(){
 }
 
 function checkColision(newx,newy){
-    if(newx<0 || newx>world.length-1 || newy<0 || newy>world.length-1 ){
+    if(newx < 0 || newx > world.length - 1 || newy < 0 || newy > world[0].length - 1 ) {
         console.log("game over");
         run = false;
         gameOver = true;

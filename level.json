@@ -11,8 +11,7 @@
         ],
         "snake": [
           [15,4], [15, 5], [15,6]
-        ],
-        "cellSize": 30   
+        ]
     },
     {
         "niveau": "Intermédiaire",
