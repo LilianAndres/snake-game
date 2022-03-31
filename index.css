@@ -40,3 +40,10 @@ canvas {
     margin-left: auto;
     margin-right: auto;
 }
+
+aside {
+    width: 40%;
+    padding-left: .5rem;
+    margin-left: .5rem;
+    float: right;
+}

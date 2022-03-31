@@ -17,7 +17,12 @@ let run = false;
 let gameOver = false ;
 
 let countFood = 0 ;
+let score = 0 ; 
 
+var eatAudio = document.createElement("audio");
+var collisionAudio = document.createElement("audio");
+eatAudio.src = "assets/audio/eat.mp3";
+collisionAudio.src = "assets/audio/collision.mp3";
 
 let direction = {
     nom : "droite",
@@ -138,7 +143,18 @@ function drawMap()
         var canvas = document.createElement("canvas");
         canvas.id = 'canvas';
         document.body.appendChild(canvas);
-    }    
+    }
+    if (document.getElementById('aside') === null) {
+        var divAside = document.createElement("aside");
+        divAside.id = 'aside';
+        document.body.appendChild(divAside);
+    }
+
+    if (document.getElementById('food') === null) {
+        var txtFood = document.createElement("p");
+        txtFood.id = 'food';
+        document.getElementById("aside").appendChild(txtFood);
+    }   
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
@@ -220,9 +236,13 @@ function isArrayInArray(array, item)
 
 function step()
 {
-    if(run && !gameOver){
-        var canvas = document.getElementById('canvas');
-        var ctx = canvas.getContext('2d');
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var txtFood = document.getElementById("food"); 
+    txtFood.textContent = "Food : "+ countFood ;
+
+    if(run && !gameOver){   
+
 
         var newx = snakeBody[snakeBody.length-1][0] +direction.x ;
         var newy = snakeBody[snakeBody.length-1][1] + direction.y;
@@ -230,9 +250,11 @@ function step()
         if (!checkColision(newx,newy) ){
 
             if (world[newx][newy] ==FOOD){
+                eatAudio.play();
                 SetRandomFood(); 
                 countFood++ ;
-                console.log(countFood);
+                score   +=100 ;
+
                 snakeBody.push([newx,newy]);
 
                 world[newx][newy] = SNAKE ;
@@ -321,19 +343,12 @@ function SetRandomFood(){
 }
 
 function checkColision(newx,newy){
-    if(newx < 0 || newx > world.length - 1 || newy < 0 || newy > world[0].length - 1 ) {
+    if(newx < 0 || newx > world.length - 1 || newy < 0 || newy > world[0].length - 1 || (world[newx][newy]==WALL)||(world[newx][newy]==SNAKE)) {
         console.log("game over");
+        collisionAudio.play();
         run = false;
         gameOver = true;
         return true ;
     }
-
-    if(world[newx][newy]==WALL ){
-        console.log("game over");
-        run=false ;
-        gameOver = true;
-        return true ;
-    }
-
     return false ;
 }
