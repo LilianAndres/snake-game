@@ -25,7 +25,7 @@ body * {
     text-decoration: none;
 }
 
-.card a {
+.header a, .card a {
     color: inherit;
     text-decoration: inherit;
 }

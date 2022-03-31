@@ -1,7 +1,7 @@
 [ {
         "niveau": "Débutant",
         "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-        "dimensions": [40, 40],
+        "dimensions": [20, 20],
         "delay": 200,
         "walls": [
             [5,5], [5,6], [5,7], [5,8]
@@ -10,8 +10,9 @@
             [10,10]
         ],
         "snake": [
-          [18,18], [18, 19], [18,20]
-        ]    
+          [15,4], [15, 5], [15,6]
+        ],
+        "cellSize": 30   
     },
     {
         "niveau": "Intermédiaire",
