@@ -14,6 +14,10 @@ let snakeBody = [];
 let world = [];
 
 let run = false;
+let gameOver = false ;
+
+let countFood = 0 ;
+
 
 let direction = {
     nom : "droite",
@@ -215,72 +219,86 @@ function isArrayInArray(array, item)
 
 function step()
 {
-    if(run){
+    if(run && !gameOver){
         var canvas = document.getElementById('canvas');
         var ctx = canvas.getContext('2d');
 
-        var newx = snake[snake.length-1][0] +direction.x ;
-        var newy = snake[snake.length-1][1] + direction.y;
-
+        var newx = snakeBody[snakeBody.length-1][0] +direction.x ;
+        var newy = snakeBody[snakeBody.length-1][1] + direction.y;
+        
         if (!checkColision(newx,newy) ){
 
-            snake.push([newx,newy]);
+            if (world[newx][newy] ==FOOD){
+                SetRandomFood(); 
+                countFood++ ;
+                console.log(countFood);
+                snakeBody.push([newx,newy]);
 
-            world[newx][newy] = SNAKE ;
+                world[newx][newy] = SNAKE ;
 
-            pFinX = snake[0][0];
-            pFinY = snake[0][1] ;
+                pFinX = snakeBody[0][0];
+                pFinY = snakeBody[0][1] ;
 
-            world[pFinX][pFinY] = EMPTY ;
-            snake.shift();
+                world[pFinX][pFinY] = EMPTY ;
+            
+            }
+            else {
+                snakeBody.push([newx,newy]);
 
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawMap();
+                world[newx][newy] = SNAKE ;
 
-            if (world[snake[snake.length-1][0]] [snake[snake.length-1][1]] ==FOOD){
-                SetRandomFood();
+                pFinX = snakeBody[0][0];
+                pFinY = snakeBody[0][1] ;
+                
+                world[pFinX][pFinY] = EMPTY ;
+
+                snakeBody.shift();
             }
 
+        
         }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMap();
 
     }
 
 }
 
 function running(){
-    setInterval(step,800);
+    setInterval(step,500);
 }
 
 
 
 function setDirection(e){
     
-    if(run == false){
+    if(run == false && !gameOver){
         running();
         run = true;
     }
 
     if (e.keyCode== 37 && direction.nom !="droite"){
-        console.log("gauche");
+        //console.log("gauche");
         direction.nom = "gauche";
         direction.x = 0;
         direction.y = -1;
 
     }
     else if(e.keyCode == 38 && direction.nom !="bas"){
-        console.log("haut");
+        //console.log("haut");
         direction.nom ="haut";
         direction.x = -1;
         direction.y = 0 ;   
     }
     else if(e.keyCode == 39 && direction.nom !="gauche" ){
-        console.log("droite");
+        //console.log("droite");
         direction.nom = "droite";
         direction.x =  0;
         direction.y = 1 ;   
     }
     else if(e.keyCode == 40 && direction.nom !="haut" ){
-        console.log("bas");
+        //console.log("bas");
         direction.nom = "bas";
         direction.x =  1;
         direction.y = 0 ;   
@@ -289,19 +307,31 @@ function setDirection(e){
 }
 
 function SetRandomFood(){
-    Math.floor(Math.random() * (max - min)) + min;
+    console.log("setRandomFOOD")
+    var x = Math.floor(Math.random() * (world.length - 0));
+    var y = Math.floor(Math.random() * (world.length - 0));
+
+    if(world[y][x]!=WALL  && world[y][x]!=SNAKE ){
+        world[y][x] = FOOD;
+        console.log("food ajoute");
+    }
+    else{
+        SetRandomFood();
+    }
 }
 
 function checkColision(newx,newy){
     if(newx<0 || newx>world.length-1 || newy<0 || newy>world.length-1 ){
         console.log("game over");
         run = false;
+        gameOver = true;
         return true ;
     }
 
     if(world[newx][newy]==WALL ){
         console.log("game over");
         run=false ;
+        gameOver = true;
         return true ;
     }
 
