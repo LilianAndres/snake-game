@@ -11,7 +11,8 @@
         ],
         "snake": [
           [15,4], [15, 5], [15,6]
-        ]
+        ], 
+        "direction": "BOTTOM"
     },
     {
         "niveau": "Intermédiaire",

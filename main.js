@@ -10,8 +10,10 @@ let levels = null;
 let level = null;
 let food = null;
 let walls = null;
+let direction = null;
 let snakeBody = [];
 let world = [];
+let hasEaten = false;
 
 let run = false;
 let gameOver = false ;
@@ -24,17 +26,11 @@ var collisionAudio = document.createElement("audio");
 eatAudio.src = "assets/audio/eat.mp3";
 collisionAudio.src = "assets/audio/collision.mp3";
 
-let direction = {
-    nom : "droite",
-    y : 1 ,
-    x : 0 ,
-};
-
 
 // listeners
 window.addEventListener('load', load);
 window.addEventListener('hashchange', generateWorld);
-document.addEventListener('keydown', setDirection, false);
+document.addEventListener('keydown', changeDirection, false);
 
 
 // chargement initial de la page
@@ -108,12 +104,28 @@ function generateWorld()
         cards.parentNode.removeChild(cards);
     }    
 
+    // on initie toutes les variables qui vont nous servir quand on charge le niveau
     level = levels[window.location.hash.split("#")[1]];
-
     walls = level.walls;
     food = level.food;
     snakeBody = level.snake;
 
+    switch(level.direction) {
+        case "RIGHT": 
+            direction = { name: level.direction, x: 1, y: 0 };
+            break;
+        case "LEFT": 
+            direction = { name: level.direction, x: -1, y: 0 };
+            break;
+        case "BOTTOM": 
+            direction = { name: level.direction, x: 0, y: 1 };
+            break;
+        case "TOP": 
+            direction = { name: level.direction, x: 0, y: -1 };
+            break;
+    }
+
+    // génération de la matrice world
     for (var i = 0; i < level.dimensions[1]; i++) {
         world[i] = [];
         for (var j = 0; j < level.dimensions[0]; j++) {
@@ -129,6 +141,7 @@ function generateWorld()
         }
     }
 
+    // affichage de world
     drawMap();
 }
 
@@ -144,6 +157,7 @@ function drawMap()
         canvas.id = 'canvas';
         document.body.appendChild(canvas);
     }
+
     if (document.getElementById('aside') === null) {
         var divAside = document.createElement("aside");
         divAside.id = 'aside';
@@ -158,6 +172,9 @@ function drawMap()
 
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
+
+    // efface le canvas existant à chaque actualisation 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     var scale = (window.innerHeight - canvas.offsetTop) / level.dimensions[0];
 
@@ -219,136 +236,122 @@ function isArrayInArray(array, item)
         var checker = [];
         for (var j = 0; j < array[i].length; j++) {
             if (array[i][j] === item[j]){
-                checker.push(true)
+                checker.push(true);
             } else {
-                checker.push(false)
+                checker.push(false);
             }
         }
 
         if (checker.every(check => check === true)){
-            return true
+            return true;
         }
     }
-
-    return false
+    return false;
 }
 
 
 function step()
 {
-    var canvas = document.getElementById('canvas');
-    var ctx = canvas.getContext('2d');
     var txtFood = document.getElementById("food"); 
-    txtFood.textContent = "Food : "+ countFood ;
+    txtFood.textContent = "Score: " + countFood;
 
     if(run && !gameOver){   
 
-
-        var newx = snakeBody[snakeBody.length-1][0] +direction.x ;
+        // définit la future position de la tête du serpent
+        var newx = snakeBody[snakeBody.length-1][0] + direction.x;
         var newy = snakeBody[snakeBody.length-1][1] + direction.y;
         
-        if (!checkColision(newx,newy) ){
+        if (!obstacle(newx,newy)) {
 
-            if (world[newx][newy] ==FOOD){
-                eatAudio.play();
-                SetRandomFood(); 
-                countFood++ ;
-                score   +=100 ;
-
-                snakeBody.push([newx,newy]);
-
-                world[newx][newy] = SNAKE ;
-
-                pFinX = snakeBody[0][0];
-                pFinY = snakeBody[0][1] ;
-
-                world[pFinX][pFinY] = EMPTY ;
-            
-            }
-            else {
-                snakeBody.push([newx,newy]);
-
-                world[newx][newy] = SNAKE ;
-
-                pFinX = snakeBody[0][0];
-                pFinY = snakeBody[0][1] ;
-                
-                world[pFinX][pFinY] = EMPTY ;
-
-                snakeBody.shift();
+            if (world[newx][newy] === FOOD) {
+                eat();
             }
 
-        
+            moveSnake(newx, newy);   
+            hasEaten = false;  // le serpent a terminé de manger
         }
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawMap();
-
     }
-
 }
 
-function running(){
-    setInterval(step,500);
+function eat() 
+{
+    eatAudio.play();
+    generateNewFood(); 
+    countFood++;
+    score += 100;
+    hasEaten = true;     
 }
 
+function moveSnake(x, y)
+{
+    const tail = snakeBody[0];
 
+    snakeBody.push([x, y]);
+    if (!hasEaten) snakeBody.shift();
 
-function setDirection(e){
+    world[x][y] = SNAKE;
+    world[tail[0]][tail[1]] = EMPTY;
+}
+
+function changeDirection(e){
     
-    if(run == false && !gameOver){
+    if(!run && !gameOver){
         running();
         run = true;
     }
 
-    if (e.keyCode== 37 && direction.nom !="droite"){
-        //console.log("gauche");
-        direction.nom = "gauche";
+    if (e.keyCode === 37 && direction.nom !== "RIGHT"){
+        // left 
+        direction.nom = "LEFT";
         direction.x = -1;
         direction.y = 0;
     }
-    else if(e.keyCode == 38 && direction.nom !="bas"){
-        //console.log("haut");
-        direction.nom ="haut";
+    else if(e.keyCode === 38 && direction.nom !== "BOTTOM"){
+        // top
+        direction.nom = "TOP";
         direction.x = 0;
         direction.y = -1;   
     }
-    else if(e.keyCode == 39 && direction.nom !="gauche" ){
-        //console.log("droite");
-        direction.nom = "droite";
+    else if(e.keyCode === 39 && direction.nom !== "LEFT" ){
+        // right
+        direction.nom = "RIGHT";
         direction.x = 1;
         direction.y = 0;   
     }
-    else if(e.keyCode == 40 && direction.nom !="haut" ){
-        //console.log("bas");
-        direction.nom = "bas";
+    else if(e.keyCode === 40 && direction.nom !== "TOP" ){
+        // bottom
+        direction.nom = "BOTTOM";
         direction.x =  0;
         direction.y = 1;   
     }
-
 }
 
-function SetRandomFood(){
-    console.log("setRandomFOOD")
-    var x = Math.floor(Math.random() * (world.length - 0));
-    var y = Math.floor(Math.random() * (world.length - 0));
+// pose une nouvelle case de nourriture sur le monde
+function generateNewFood()
+{
+    var x = Math.floor(Math.random() * (level.dimensions[1])); 
+    var y = Math.floor(Math.random() * (level.dimensions[0])); 
 
-    if(world[y][x]!=WALL  && world[y][x]!=SNAKE ){
-        world[y][x] = FOOD;
-        console.log("food ajoute");
-    }
-    else{
-        SetRandomFood();
-    }
+    if(!isArrayInArray(walls, [x, y]) && !isArrayInArray(snakeBody, [x, y])) world[x][y] = FOOD;
+    else generateNewFood();
 }
 
-function checkColision(newx,newy){
-    if(newx < 0 || newx > world.length - 1 || newy < 0 || newy > world[0].length - 1 || (world[newx][newy]==WALL)||(world[newx][newy]==SNAKE)) {
-        console.log("game over");
+
+function obstacle(x,y)
+{
+    // si le serpent touche un rebord, un mur ou se mord la queue
+    if(x < 0 || x > world.length - 1 || y < 0 || y > world[0].length - 1 || isArrayInArray(walls, [x, y]) || isArrayInArray(snakeBody, [x, y])) {
         collisionAudio.play();
         run = false;
         gameOver = true;
-        return true ;
+        return true;
     }
     return false ;
+}
+
+function running()
+{
+    setInterval(step, level.delay);
 }
