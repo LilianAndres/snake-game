@@ -9,9 +9,16 @@ html, body {
     padding: 0 !important;
 }
 
-.header h1 {
+#header {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
     text-align: center;
-    color: green;
+}
+
+#header img {
+    width: 45%;
+    height: auto;
 }
 
 /* LOADING SCREEN */
@@ -19,12 +26,17 @@ html, body {
 .cards {
     display: flex;
     flex-direction: column;
-    margin: 10vh 12vw 0 12vw;
+    margin-top: 5vh;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
 }
 
 .cards .card {
-    margin-bottom: 1vh;
+    margin-bottom: 3vh;
     padding: 10px;
+    border: 1px solid black;
+    box-shadow: 12px 12px 2px 1px rgba(1, 255, 14, 0.2);
 }
 
 .card a.fill-div {
@@ -48,8 +60,7 @@ canvas {
 }
 
 aside {
-    width: 40%;
-    padding-left: .5rem;
-    margin-left: .5rem;
-    float: right;
+    display: none;
+    position: relative;
+    z-index: 999;
 }

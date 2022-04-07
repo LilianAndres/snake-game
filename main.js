@@ -6,17 +6,18 @@ const WALL = 3;
 
 let canvas = null;
 let ctx = null;
-let levels = null;
-let level = null;
-let food = null;
-let walls = null;
-let direction = null;
-let snakeBody = [];
+let levels = null; // charge le json
+let level = null; // charge le niveau séléctionné
+let food = null;  // identifie la nourriture
+let blocks = null;  // contient les blocs (murs, glaces...)
+let direction = null;  // stocke la direction actuelle
+let snakeBody = []; 
 let world = [];
 let hasEaten = false;
 
 let run = false;
 let gameOver = false ;
+let countInterval = 0;
 
 let countFood = 0 ;
 let score = 0 ; 
@@ -51,9 +52,21 @@ async function load() {
     img.hidden = 'true';
     document.body.appendChild(img);
 
-    var img = document.createElement("img");
-    img.src = 'assets/wall.jpg';
+    // var img = document.createElement("img");
+    // img.src = 'assets/wall.jpg';
+    // img.id = 'wall';
+    // img.hidden = 'true';
+    // document.body.appendChild(img);
+
+    img = document.createElement("img");
+    img.src = 'assets/rock.png';
     img.id = 'wall';
+    img.hidden = 'true';
+    document.body.appendChild(img);
+
+    img = document.createElement("img");
+    img.src = 'assets/ice.png';
+    img.id = 'ice';
     img.hidden = 'true';
     document.body.appendChild(img);
     
@@ -106,7 +119,7 @@ function generateWorld()
 
     // on initie toutes les variables qui vont nous servir quand on charge le niveau
     level = levels[window.location.hash.split("#")[1]];
-    walls = level.walls;
+    blocks = level.blocks;    
     food = level.food;
     snakeBody = level.snake;
 
@@ -129,7 +142,7 @@ function generateWorld()
     for (var i = 0; i < level.dimensions[1]; i++) {
         world[i] = [];
         for (var j = 0; j < level.dimensions[0]; j++) {
-            if (isArrayInArray(walls, [i, j])) {
+            if (isArrayInArray(blocks.walls, [i, j])) {
                 world[i][j] = WALL;
             } else if (isArrayInArray(food, [i, j])) {
                 world[i][j] = FOOD;
@@ -151,11 +164,9 @@ function drawMap()
 
     // si c'est le premier appel à la méthode, le canvas n'existe pas
     if (document.getElementById('canvas') === null) {
-        // var title = document.getElementById('header');
-        // title.parentNode.removeChild(title);
-        var canvas = document.createElement("canvas");
-        canvas.id = 'canvas';
-        document.body.appendChild(canvas);
+        var c = document.createElement("canvas");
+        c.id = 'canvas';
+        document.body.appendChild(c);
     }
 
     if (document.getElementById('aside') === null) {
@@ -182,12 +193,14 @@ function drawMap()
     canvas.height = scale * level.dimensions[0];
 
     // on récupère la tête et la queue pour les dessiner spécifiquement
+    var head = null;
+    var tail = null;
     if (snakeBody.length > 1) {
-        var head = snakeBody[snakeBody.length - 1];
-        var tail = snakeBody[0];    
+        head = snakeBody[snakeBody.length - 1];
+        tail = snakeBody[0];    
     } else {
-        var head = snakeBody[snakeBody.length - 1];
-        var tail = null;   
+        head = snakeBody[snakeBody.length - 1];
+        tail = null;   
     }
     
     // effectue le dessin
@@ -195,33 +208,29 @@ function drawMap()
         for (var j = 0; j < level.dimensions[0]; j++) {
 
             // les cases sont remplies avec des couleurs alternées pour les differencier
-            if (i % 2 == 0) ctx.fillStyle = (j % 2 == 0) ? '#0454b0' : '#4692ea';
-            else ctx.fillStyle = (j % 2 == 0) ? '#4692ea' : '#0454b0';
+            if (i % 2 === 0) ctx.fillStyle = (j % 2 === 0) ? '#7bd57d' : '#46a011';
+            else ctx.fillStyle = (j % 2 === 0) ? '#46a011' : '#7bd57d';
             ctx.fillRect(i * scale, j * scale, scale, scale); 
             
             // applique les styles propres à chaque état du monde
             if (world[i][j] === FOOD) {                
                 ctx.drawImage(document.getElementById('apple'), i * scale, j * scale, scale, scale);
             } else if (world[i][j] === SNAKE) {
-                if (i == head[0] && j == head[1]) {
-                    // dessine sa tête
-                    ctx.beginPath();
-                    ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/2, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'green';
-                    ctx.fill();
-                } else if (tail != null && i == tail[0] && j == tail[1]) {
+                ctx.beginPath();                
+                if (i === head[0] && j === head[1]) {
+                    // dessine sa tête                    
+                    ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/2, 0, 2 * Math.PI);                    
+                } else if (tail !== null && i === tail[0] && j === tail[1]) {
                     // dessine sa queue, si elle existe (si le corps du serpent fait au moins 2 cases)
-                    ctx.beginPath();
                     ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/4, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'green';
-                    ctx.fill();
                 } else {
                     // dessine les morceaux du corps
-                    ctx.beginPath();
                     ctx.arc(i * scale + scale/2, j * scale + scale/2, scale/3, 0, 2 * Math.PI);
-                    ctx.fillStyle = 'green';
-                    ctx.fill();
                 }
+                ctx.fillStyle = '#4a78f2';
+                ctx.fill();
+                ctx.strokeStyle = 'black';
+                ctx.stroke();
             } else if (world[i][j] === WALL) {
                 ctx.drawImage(document.getElementById('wall'), i * scale, j * scale, scale, scale);
             }
@@ -257,6 +266,9 @@ function step()
 
     if(run && !gameOver){   
 
+        countInterval += 1;
+        if(countInterval === (level.repopFood / level.delay)) depopFood(); 
+
         // définit la future position de la tête du serpent
         var newx = snakeBody[snakeBody.length-1][0] + direction.x;
         var newy = snakeBody[snakeBody.length-1][1] + direction.y;
@@ -275,13 +287,15 @@ function step()
     }
 }
 
+
 function eat() 
 {
     eatAudio.play();
     generateNewFood(); 
     countFood++;
     score += 100;
-    hasEaten = true;     
+    hasEaten = true;  
+    countInterval = 0;   
 }
 
 function moveSnake(x, y)
@@ -334,15 +348,27 @@ function generateNewFood()
     var x = Math.floor(Math.random() * (level.dimensions[1])); 
     var y = Math.floor(Math.random() * (level.dimensions[0])); 
 
-    if(!isArrayInArray(walls, [x, y]) && !isArrayInArray(snakeBody, [x, y])) world[x][y] = FOOD;
-    else generateNewFood();
+    if(!isArrayInArray(blocks.walls, [x, y]) && !isArrayInArray(snakeBody, [x, y])) {
+        world[x][y] = FOOD;
+        food[0][0] = x;
+        food[0][1] = y;
+    } else {
+        generateNewFood();
+    }
+}
+
+function depopFood()
+{
+    world[food[0][0]][food[0][1]] = EMPTY;
+    generateNewFood();
+    countInterval = 0;
 }
 
 
 function obstacle(x,y)
 {
     // si le serpent touche un rebord, un mur ou se mord la queue
-    if(x < 0 || x > world.length - 1 || y < 0 || y > world[0].length - 1 || isArrayInArray(walls, [x, y]) || isArrayInArray(snakeBody, [x, y])) {
+    if(x < 0 || x > world.length - 1 || y < 0 || y > world[0].length - 1 || isArrayInArray(blocks.walls, [x, y]) || isArrayInArray(snakeBody, [x, y])) {
         collisionAudio.play();
         run = false;
         gameOver = true;
