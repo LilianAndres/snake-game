@@ -55,12 +55,61 @@ html, body {
 
 canvas {
     display: block;
+    margin-left: 30%;
+    margin-right: auto;
+
+    position : relative;
+}
+
+/* div canvas */
+#div-canvas{
+    display: flex;
+}
+
+
+aside {
+    width: 40%;
+    padding-left: .5rem;
+    margin-left: .5rem;
+    float: right;
+}
+
+
+/* div game over */
+#div-game-over {
+    display : flex ;
+    flex-direction: column;
+    position: absolute;
+    justify-content: space-around;
+    
+    width: 30%;
+    height: 30%;
+
+    margin-left: auto;
+    margin-right: auto;
+
+    top:35%;
+    left:35%;
+
+    background-color: black;
+}
+
+#div-game-over p {
+    color:white ;
+
     margin-left: auto;
     margin-right: auto;
 }
 
-aside {
-    display: none;
-    position: relative;
-    z-index: 999;
+#div-button{
+    display: flex;
+    justify-content: space-around;
 }
+
+
+#button-retry{
+    display: block;
+    align-items: center;
+}
+
+

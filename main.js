@@ -10,17 +10,20 @@ let levels = null; // charge le json
 let level = null; // charge le niveau séléctionné
 let food = null;  // identifie la nourriture
 let blocks = null;  // contient les blocs (murs, glaces...)
-let direction = null;  // stocke la direction actuelle
-let snakeBody = []; 
+let snakeDirection = null;  // stocke la direction actuelle
+let snakeBody = [];
 let world = [];
 let hasEaten = false;
 
 let run = false;
+let countRun = 0 ; 
+let idInterval = null;
 let gameOver = false ;
 let countInterval = 0;
 
-let countFood = 0 ;
 let score = 0 ; 
+
+let i= 0 ;
 
 var eatAudio = document.createElement("audio");
 var collisionAudio = document.createElement("audio");
@@ -120,21 +123,21 @@ function generateWorld()
     // on initie toutes les variables qui vont nous servir quand on charge le niveau
     level = levels[window.location.hash.split("#")[1]];
     blocks = level.blocks;    
-    food = level.food;
-    snakeBody = level.snake;
+    food = Object.values(level.food);
+    snakeBody = Object.values(level.snake);
 
     switch(level.direction) {
         case "RIGHT": 
-            direction = { name: level.direction, x: 1, y: 0 };
+            snakeDirection  = { name: level.direction, x: 1, y: 0 };
             break;
         case "LEFT": 
-            direction = { name: level.direction, x: -1, y: 0 };
+            snakeDirection = { name: level.direction, x: -1, y: 0 };
             break;
         case "BOTTOM": 
-            direction = { name: level.direction, x: 0, y: 1 };
+            snakeDirection = { name: level.direction, x: 0, y: 1 };
             break;
         case "TOP": 
-            direction = { name: level.direction, x: 0, y: -1 };
+            snakeDirection = { name: level.direction, x: 0, y: -1 };
             break;
     }
 
@@ -161,18 +164,25 @@ function generateWorld()
 // dessine la matrice dans le canvas HTML
 function drawMap()
 {
+    if (document.getElementById('div-canvas') === null) {
+        var divCanvas = document.createElement("div");
+        divCanvas.id = 'div-canvas';
+        document.body.appendChild(divCanvas);
+    }
 
     // si c'est le premier appel à la méthode, le canvas n'existe pas
     if (document.getElementById('canvas') === null) {
-        var c = document.createElement("canvas");
-        c.id = 'canvas';
-        document.body.appendChild(c);
+        var divCanvas = document.getElementById('div-canvas');
+        var canvas = document.createElement("canvas");
+        canvas.id = 'canvas';
+        divCanvas.appendChild(canvas);
     }
 
     if (document.getElementById('aside') === null) {
+        var divCanvas = document.getElementById('div-canvas');
         var divAside = document.createElement("aside");
         divAside.id = 'aside';
-        document.body.appendChild(divAside);
+        divCanvas.appendChild(divAside);
     }
 
     if (document.getElementById('food') === null) {
@@ -262,7 +272,7 @@ function isArrayInArray(array, item)
 function step()
 {
     var txtFood = document.getElementById("food"); 
-    txtFood.textContent = "Score: " + countFood;
+    txtFood.textContent = "Score: " + score;
 
     if(run && !gameOver){   
 
@@ -270,8 +280,8 @@ function step()
         if(countInterval === (level.repopFood / level.delay)) depopFood(); 
 
         // définit la future position de la tête du serpent
-        var newx = snakeBody[snakeBody.length-1][0] + direction.x;
-        var newy = snakeBody[snakeBody.length-1][1] + direction.y;
+        var newx = snakeBody[snakeBody.length-1][0] + snakeDirection.x;
+        var newy = snakeBody[snakeBody.length-1][1] + snakeDirection.y;
         
         if (!obstacle(newx,newy)) {
 
@@ -284,6 +294,16 @@ function step()
         }
 
         drawMap();
+        if(gameOver){
+            drawGameOver(score);
+            console.log("suppression interval")
+            deleteInterval() 
+            
+        }
+
+    }
+    else {
+        i++;
     }
 }
 
@@ -292,10 +312,9 @@ function eat()
 {
     eatAudio.play();
     generateNewFood(); 
-    countFood++;
-    score += 100;
-    hasEaten = true;  
     countInterval = 0;   
+    score++;
+    hasEaten = true;     
 }
 
 function moveSnake(x, y)
@@ -311,34 +330,36 @@ function moveSnake(x, y)
 
 function changeDirection(e){
     
-    if(!run && !gameOver){
+    if(!run  && countRun==0){
         running();
         run = true;
+        countRun++;
+        console.log("new running");
     }
 
-    if (e.keyCode === 37 && direction.nom !== "RIGHT"){
+    if (e.keyCode === 37 && snakeDirection.name !== "RIGHT"){
         // left 
-        direction.nom = "LEFT";
-        direction.x = -1;
-        direction.y = 0;
+        snakeDirection.name = "LEFT";
+        snakeDirection.x = -1;
+        snakeDirection.y = 0;
     }
-    else if(e.keyCode === 38 && direction.nom !== "BOTTOM"){
+    else if(e.keyCode === 38 && snakeDirection.name !== "BOTTOM"){
         // top
-        direction.nom = "TOP";
-        direction.x = 0;
-        direction.y = -1;   
+        snakeDirection.name = "TOP";
+        snakeDirection.x = 0;
+        snakeDirection.y = -1;   
     }
-    else if(e.keyCode === 39 && direction.nom !== "LEFT" ){
+    else if(e.keyCode === 39 && snakeDirection.name !== "LEFT" ){
         // right
-        direction.nom = "RIGHT";
-        direction.x = 1;
-        direction.y = 0;   
+        snakeDirection.name = "RIGHT";
+        snakeDirection.x = 1;
+        snakeDirection.y = 0;   
     }
-    else if(e.keyCode === 40 && direction.nom !== "TOP" ){
+    else if(e.keyCode === 40 && snakeDirection.name !== "TOP" ){
         // bottom
-        direction.nom = "BOTTOM";
-        direction.x =  0;
-        direction.y = 1;   
+        snakeDirection.name = "BOTTOM";
+        snakeDirection.x =  0;
+        snakeDirection.y = 1;   
     }
 }
 
@@ -378,6 +399,87 @@ function obstacle(x,y)
 }
 
 function running()
-{
-    setInterval(step, level.delay);
+{   
+    idInterval = setInterval(step, level.delay);
+    console.log("création interval : "+ idInterval);
+}
+
+function drawGameOver (score){
+    var canvas = document.getElementById('canvas');
+
+    // Création des images 
+    var imgretry = document.createElement("img");
+    imgretry.src = 'assets/retry.png';
+    imgretry.id = 'retry';
+    imgretry.width = 40;
+    var imgHome = document.createElement("img");
+    imgHome.src = 'assets/home.png';
+    imgHome.id = 'home';
+    imgHome.width = 40;
+    
+    // Création de la div game over et de la div contenant les boutons 
+    var divGameOver = document.createElement("div");
+    divGameOver.id= "div-game-over";
+    var divButton = document.createElement("div");
+    divButton.id= "div-button";
+
+    // Création des boutons pour relancer le niveau et retouner a l'accueil
+    var buttonRetry = document.createElement("button");
+    buttonRetry.id = "button-retry";
+    var buttonHome = document.createElement("button");
+    buttonHome.id = "button-home";
+    
+    // Création du texte game over et le texte contenant le score
+    var textGameOver = document.createElement("p");
+    textGameOver.id ="text-game-over"
+    textGameOver.textContent = "Game Over" ;
+    var textScore = document.createElement("p");
+    textScore.id ="text-score"
+    textScore.textContent = "Score: "+score ;
+
+    // Affection des functions sur les boutons  
+    buttonHome.onclick= home;
+    buttonRetry.onclick= restart ;
+
+    // Intégrations des différents éléments 
+    divGameOver.appendChild(textGameOver);
+    divGameOver.appendChild(textScore);
+    divGameOver.appendChild(divButton);
+    divButton.appendChild(buttonRetry); 
+    divButton.appendChild(buttonHome); 
+    document.body.appendChild(divGameOver);
+    buttonRetry.appendChild(imgretry);
+    buttonHome.appendChild(imgHome);
+
+}
+
+function restart(){
+
+    var divGameOver = document.getElementById('div-game-over');
+
+    // suppression de la div game over
+    divGameOver.parentNode.removeChild(divGameOver);
+
+    // renitialisation des variables 
+    gameOver = false ; 
+    score = 0;
+    
+    // on vide le tableau contenant la position du snake et celui de la nourriture 
+    for(var i = 0 ; snakeBody.length;i++){
+        snakeBody.pop();
+    }
+    food.pop();
+
+    // on regenere le monde 
+    generateWorld();
+
+    countRun = 0;
+}
+
+function deleteInterval(){
+    clearInterval(idInterval);
+}
+
+function home (){
+    window.location = window.location.href.split("#")[0]
 }
