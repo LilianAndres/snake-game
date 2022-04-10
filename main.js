@@ -27,8 +27,7 @@ let i= 0 ;
 
 var eatAudio = document.createElement("audio");
 var collisionAudio = document.createElement("audio");
-eatAudio.src = "assets/audio/eat.mp3";
-collisionAudio.src = "assets/audio/collision.mp3";
+var music = document.createElement("audio");
 
 
 // listeners
@@ -39,6 +38,14 @@ document.addEventListener('keydown', changeDirection, false);
 
 // chargement initial de la page
 async function load() {
+    
+    eatAudio.src = "assets/audio/eat.mp3";
+    collisionAudio.src = "assets/audio/collision.mp3";
+    music.src = "assets/audio/soundtrack.mp3";
+    music.volume = 0.15;
+    
+    playMusic();
+    setInterval(playMusic, 103000 );
 
     // on récupère tous les niveaux
     const response = await fetch("level.json");
@@ -297,7 +304,6 @@ function step()
         drawMap();
         if(gameOver){
             drawGameOver(score);
-            console.log("suppression interval")
             deleteInterval() 
             
         }
@@ -342,7 +348,6 @@ function changeDirection(e){
         running();
         run = true;
         countRun++;
-        console.log("new running");
     }
 
     if (e.keyCode === 37 && snakeDirection.name !== "RIGHT"){
@@ -412,7 +417,6 @@ function running()
 }
 
 function drawGameOver (score){
-    var canvas = document.getElementById('canvas');
 
     // Création des images 
     var imgretry = document.createElement("img");
@@ -472,9 +476,7 @@ function restart(){
     score = 0;
     
     // on vide le tableau contenant la position du snake et celui de la nourriture 
-    for(var i = 0 ; snakeBody.length;i++){
-        snakeBody.pop();
-    }
+    snakeBody.pop();
     food.pop();
 
     // on regenere le monde 
@@ -483,11 +485,14 @@ function restart(){
     countRun = 0;
 }
 
-function home()
-{
-    window.location = window.location.href.split('#')[0];
-}
-
 function deleteInterval(){
     clearInterval(idInterval);
+}
+
+function home (){
+    window.location = window.location.href.split("#")[0]
+}
+
+function playMusic(){
+    music.play();
 }

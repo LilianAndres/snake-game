@@ -31,6 +31,9 @@ html, body {
     margin-right: auto;
     width: 50%;
 }
+.card:hover{
+    background-color: #9ACD32;
+}
 
 .cards .card {
     margin-bottom: 3vh;
@@ -55,23 +58,19 @@ html, body {
 
 canvas {
     display: block;
-    margin-left: 30%;
-    margin-right: auto;
-
     position : relative;
 }
 
 /* div canvas */
 #div-canvas{
     display: flex;
-}
+    justify-content: center;
+}   
 
 
 aside {
-    width: 40%;
-    padding-left: .5rem;
-    margin-left: .5rem;
-    float: right;
+    margin-left: 2%;
+    float: left;
 }
 
 
