@@ -1,11 +1,11 @@
 [ {
         "niveau": "Débutant",
-        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        "description": "Ce niveau est fait pour vous faire la main avec le jeu. Partez en quête de nourriture pour grandir mais faites attention aux murs et aux rebords. Ne vous mordez pas la queue et tentez de faire le meilleur score ! L'accélération et la disparition des pommes ont été réduites. Les pommes disparaissent toutes les 10 secondes. Le serpent accélèrera toutes les 10 pommes mangées, ne vous faites pas avoir !",
         "dimensions": [20, 20],
         "delay": 200,
         "blocks": {
             "walls": [ [5,5], [5,6], [5,7], [5,8] ],
-            "ice": [ [7,6], [7,7], [7,8], [7,9] ]
+            "ice": []
         },
         "food": [
             [10,10]
@@ -14,23 +14,67 @@
           [15,4], [15, 5], [15,6]
         ], 
         "direction": "BOTTOM",
-        "repopFood": 2000
+        "repopFood": 10000,
+        "calculAcceleration": {
+            "score": 10,
+            "acceleration": 15
+        }
     },
     {
         "niveau": "Intermédiaire",
-        "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
-        "dimensions": [80, 40],
-        "delay": 200,
-        "walls": [
-            [5,5], [5,6], [5,7], [5,8], [70, 35], [71, 35], [72, 35]
+        "description": "Evoluez dans un parcours semé d'obstacles. Partez en quête de nourriture pour grandir mais faites attention aux murs et aux rebords. Ne vous mordez pas la queue et tentez de faire le meilleur score ! Les pommes disparaissent toutes les 5 secondes. Le serpent est plus rapide et accélèrera toutes les 5 pommes mangées, ne vous faites pas avoir !",
+        "dimensions": [25, 40],
+        "delay": 150,
+        "blocks": {
+            "walls": [ [5,5], [5,6], [5,7], [5,8],
+                        [15,5], [15,6], [15,7], [15,8] ,
+                        [22,15], [24,15], [23,15],
+                        [30,10], [30,11], [30,12],[30,13],[31,13], [32,13], [33,13],[33,12],
+                        [35,16], [35,17], [35,18],[35,19],[35,20], [36,18], [37,18],[38,18],[34,18], [33,18],[32,18],
+                        [8,20], [7,20],[8,21],[7,21], [8,22],[7,22],[8,19], [7,19],[8,18],[7,18]
+                    ],
+            "ice":[]
+        },
+        "food": [
+            [10,10]
         ],
+        "snake": [
+            [35,4], [34, 4], [33,4], [32,4]
+        ],
+        "direction": "LEFT",
+        "repopFood": 5000,
+        "calculAcceleration": {
+            "score": 5,
+            "acceleration": 20
+        }
+    },
+    {
+        "niveau": "Confirmé",
+        "description": "C'est le niveau le plus difficile du jeu. Le monde est très grand, il y a beaucoup d'obstacles. Le serpent est très rapide et la nourriture disparaît rapidement. Il accélère toutes les 5 pommes mais à une vitesse halucinante. Bon courage aux joueurs les plus fous !",
+        "dimensions": [40, 40],
+        "delay": 110,
+        "blocks": {
+            "walls": [ [5,5], [5,6], [5,7], [5,8],
+                        [15,5], [15,6], [15,7], [15,8] ,
+                        [22,15], [24,15], [23,15],
+                        [30,10], [30,11], [30,12],[30,13],[31,13], [32,13], [33,13],[33,12],
+                        [35,16], [35,17], [35,18],[35,19],[35,20], [36,18], [37,18],[38,18],[34,18], [33,18],[32,18],
+                        [8,20], [7,20],[8,21],[7,21], [8,22],[7,22],[8,19], [7,19],[8,18],[7,18]
+                    ],
+            "ice":[]
+        },
         "food": [
             [10,10]
         ],
         "snake": [
             [18,18], [18, 19], [18,20]
         ],
-        "direction": "BOTTOM"
+        "direction": "BOTTOM",
+        "repopFood": 3000,
+        "calculAcceleration": {
+            "score": 5,
+            "acceleration": 30
+        }
     }
 ]
 

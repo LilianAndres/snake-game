@@ -90,7 +90,7 @@ function displayLevels()
         var title = document.createElement("h3");
         var description = document.createElement("p");
 
-        var titleNode = document.createTextNode("Niveau " + i + " (" + levels[i].niveau + ")");
+        var titleNode = document.createTextNode("Niveau " + (i + 1) + " (" + levels[i].niveau + ")");
         title.appendChild(titleNode);
 
         var descriptionNode = document.createTextNode(levels[i].description);
@@ -274,10 +274,11 @@ function step()
     var txtFood = document.getElementById("food"); 
     txtFood.textContent = "Score: " + score;
 
-    if(run && !gameOver){   
+    if(run && !gameOver){          
 
+        // disparition de la nourriture
         countInterval += 1;
-        if(countInterval === (level.repopFood / level.delay)) depopFood(); 
+        if(countInterval === Math.round(level.repopFood / level.delay)) depopFood(); 
 
         // définit la future position de la tête du serpent
         var newx = snakeBody[snakeBody.length-1][0] + snakeDirection.x;
@@ -315,6 +316,13 @@ function eat()
     countInterval = 0;   
     score++;
     hasEaten = true;     
+
+    // accélération de la course du serpent toutes les n pommes (avec n = level.acceleration)
+    if (level.calculAcceleration.acceleration !== 0 && score !== 0 && score % level.calculAcceleration.score === 0 && (level.delay - level.calculAcceleration.acceleration) > 0) {
+        clearInterval(idInterval);
+        level.delay -= 20; 
+        idInterval = setInterval(step, level.delay);
+    }
 }
 
 function moveSnake(x, y)
@@ -401,7 +409,6 @@ function obstacle(x,y)
 function running()
 {   
     idInterval = setInterval(step, level.delay);
-    console.log("création interval : "+ idInterval);
 }
 
 function drawGameOver (score){
@@ -438,8 +445,8 @@ function drawGameOver (score){
     textScore.textContent = "Score: "+score ;
 
     // Affection des functions sur les boutons  
-    buttonHome.onclick= home;
-    buttonRetry.onclick= restart ;
+    buttonHome.onclick = home;
+    buttonRetry.onclick= restart;
 
     // Intégrations des différents éléments 
     divGameOver.appendChild(textGameOver);
@@ -476,10 +483,11 @@ function restart(){
     countRun = 0;
 }
 
-function deleteInterval(){
-    clearInterval(idInterval);
+function home()
+{
+    window.location = window.location.href.split('#')[0];
 }
 
-function home (){
-    window.location = window.location.href.split("#")[0]
+function deleteInterval(){
+    clearInterval(idInterval);
 }
