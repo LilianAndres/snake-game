@@ -1,3 +1,5 @@
+// jshint browser:true, eqeqeq:true, undef:true, devel:true, esnext: true
+
 // déclaration
 const EMPTY = 0;
 const SNAKE = 1;
@@ -5,6 +7,7 @@ const FOOD = 2;
 const WALL = 3;
 
 let canvas = null;
+let divCanvas = null;
 let ctx = null;
 let levels = null; // charge le json
 let level = null; // charge le niveau séléctionné
@@ -23,8 +26,6 @@ let countInterval = 0;
 
 let score = 0 ; 
 
-let i= 0 ;
-
 var eatAudio = document.createElement("audio");
 var collisionAudio = document.createElement("audio");
 var music = document.createElement("audio");
@@ -33,55 +34,61 @@ var music = document.createElement("audio");
 // listeners
 window.addEventListener('load', load);
 window.addEventListener('hashchange', generateWorld);
+music.addEventListener('ended',playMusic);
 document.addEventListener('keydown', changeDirection, false);
 
+function load() {
 
-// chargement initial de la page
-async function load() {
+    let url = "http://localhost/snake-js/level.json";
+
+    fetch(url).then(function(response) {
+
+        if(response.ok) {
+            return response.json();
+        } else {
+            throw("Error " + response.status);
+        }
     
-    eatAudio.src = "assets/audio/eat.mp3";
-    collisionAudio.src = "assets/audio/collision.mp3";
-    music.src = "assets/audio/soundtrack.mp3";
-    music.volume = 0.15;
+    }).then(function(data) {
     
-    playMusic();
-    setInterval(playMusic, 103000 );
+        eatAudio.src = "assets/audio/eat.mp3";
+        collisionAudio.src = "assets/audio/collision.mp3";
+        music.src = "assets/audio/soundtrack.mp3";
+        music.volume = 0.1;
+        eatAudio.volume = 0.1;
+        collisionAudio.volume = 0.1;
 
-    // on récupère tous les niveaux
-    const response = await fetch("level.json");
-    if (response.ok) {
-        levels = await response.json();
-    } else {
-        throw("Error " + response.status);
-    }
 
-    // on charge les sprites de manière cachée
-    var img = document.createElement("img");
-    img.src = 'assets/apple.png';
-    img.id = 'apple';
-    img.hidden = 'true';
-    document.body.appendChild(img);
+        playMusic();    
+        levels = data;
 
-    // var img = document.createElement("img");
-    // img.src = 'assets/wall.jpg';
-    // img.id = 'wall';
-    // img.hidden = 'true';
-    // document.body.appendChild(img);
+        // on charge les sprites de manière cachée
+        var img = document.createElement("img");
+        img.src = 'assets/apple.png';
+        img.id = 'apple';
+        img.hidden = 'true';
+        document.body.appendChild(img);
 
-    img = document.createElement("img");
-    img.src = 'assets/rock.png';
-    img.id = 'wall';
-    img.hidden = 'true';
-    document.body.appendChild(img);
+        img = document.createElement("img");
+        img.src = 'assets/rock.png';
+        img.id = 'wall';
+        img.hidden = 'true';
+        document.body.appendChild(img);
 
-    img = document.createElement("img");
-    img.src = 'assets/ice.png';
-    img.id = 'ice';
-    img.hidden = 'true';
-    document.body.appendChild(img);
+        img = document.createElement("img");
+        img.src = 'assets/ice.png';
+        img.id = 'ice';
+        img.hidden = 'true';
+        document.body.appendChild(img);
+        
+        // on affiche tous les niveaux
+        displayLevels();
     
-    // on affiche tous les niveaux
-    displayLevels();
+    }).catch(function(err) {
+    
+        console.log(err);
+    
+    });
 }
 
 // manipulation de l'arbre DOM pour afficher tous les niveaux
@@ -126,6 +133,8 @@ function generateWorld()
         var cards = document.getElementById('cards');
         cards.parentNode.removeChild(cards);
     }    
+
+    playMusic();
 
     // on initie toutes les variables qui vont nous servir quand on charge le niveau
     level = levels[window.location.hash.split("#")[1]];
@@ -172,21 +181,20 @@ function generateWorld()
 function drawMap()
 {
     if (document.getElementById('div-canvas') === null) {
-        var divCanvas = document.createElement("div");
-        divCanvas.id = 'div-canvas';
-        document.body.appendChild(divCanvas);
+        var div = document.createElement("div");
+        div.id = 'div-canvas';
+        document.body.appendChild(div);
+        divCanvas = div ;
     }
 
     // si c'est le premier appel à la méthode, le canvas n'existe pas
     if (document.getElementById('canvas') === null) {
-        var divCanvas = document.getElementById('div-canvas');
-        var canvas = document.createElement("canvas");
-        canvas.id = 'canvas';
-        divCanvas.appendChild(canvas);
+        var c = document.createElement("canvas");
+        c.id = 'canvas';
+        divCanvas.appendChild(c);
     }
 
     if (document.getElementById('aside') === null) {
-        var divCanvas = document.getElementById('div-canvas');
         var divAside = document.createElement("aside");
         divAside.id = 'aside';
         divCanvas.appendChild(divAside);
@@ -195,6 +203,7 @@ function drawMap()
     if (document.getElementById('food') === null) {
         var txtFood = document.createElement("p");
         txtFood.id = 'food';
+        txtFood.textContent = "Score: " + score;
         document.getElementById("aside").appendChild(txtFood);
     }   
 
@@ -277,8 +286,9 @@ function isArrayInArray(array, item)
 
 
 function step()
-{
-    var txtFood = document.getElementById("food"); 
+{   
+
+    var txtFood = document.getElementById('food');
     txtFood.textContent = "Score: " + score;
 
     if(run && !gameOver){          
@@ -304,7 +314,7 @@ function step()
         drawMap();
         if(gameOver){
             drawGameOver(score);
-            deleteInterval() 
+            deleteInterval();
             
         }
 
@@ -326,7 +336,7 @@ function eat()
     // accélération de la course du serpent toutes les n pommes (avec n = level.acceleration)
     if (level.calculAcceleration.acceleration !== 0 && score !== 0 && score % level.calculAcceleration.score === 0 && (level.delay - level.calculAcceleration.acceleration) > 0) {
         clearInterval(idInterval);
-        level.delay -= 20; 
+        level.delay -= level.calculAcceleration.acceleration;
         idInterval = setInterval(step, level.delay);
     }
 }
@@ -344,7 +354,7 @@ function moveSnake(x, y)
 
 function changeDirection(e){
     
-    if(!run  && countRun==0){
+    if(!run  && countRun===0){
         running();
         run = true;
         countRun++;
