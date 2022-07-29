@@ -17,7 +17,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/LilianAndres/snake-game">
-    <img src="client/src/assets/logo.png" alt="Logo" width="130" height="100">
+    <img src="assets/apple.png" alt="Logo" width="130" height="130">
   </a>
 
 <h3 align="center">Snake Game</h3>
